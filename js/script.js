@@ -10,6 +10,12 @@ $(document).ready(function() {
     let isAnimating = false;
     let previousSection = null;
     let sectionOffsets = [];
+    let isMobileDevice = false;
+    
+    // Detect mobile devices
+    function detectMobile() {
+        isMobileDevice = window.innerWidth < 768; // Tailwind's md breakpoint
+    }
     
     // Calculate actual section positions
     function calculateSectionOffsets() {
@@ -82,31 +88,21 @@ $(document).ready(function() {
         previousSection = currentSectionObj;
     });
     
-    // Navigation dot click handler - Auto-reveals all content (great for mobile/touch devices!)
+    // Navigation dot click handler
     navDots.on('click', function() {
         const sectionIndex = $(this).data('section');
         const targetScroll = sectionOffsets[sectionIndex] || 0;
         scrollToPosition(targetScroll, 800);
         
-        // After scrolling, automatically reveal ALL content for reveal sections
-        // This is especially useful for mobile devices where pressing → repeatedly is tedious
+        // After scrolling, reveal all content for reveal sections
         setTimeout(function() {
-            // Manually check which section we scrolled to by checking all reveal sections
-            Object.keys(revealSections).forEach(key => {
-                const section = revealSections[key];
-                const scrollTop = container.scrollTop();
-                const containerOffset = container.offset().top;
-                
-                // Check if this section is now active
-                if (section.checkActive(scrollTop, containerOffset)) {
-                    // If this section hasn't been revealed yet, reveal all its content
-                    if (!section.hasBeenRevealed) {
-                        while (!section.isComplete()) {
-                            section.revealNext();
-                        }
-                    }
+            const section = getActiveSection();
+            if (section && !section.hasBeenRevealed) {
+                // Reveal all items in the section
+                while (!section.isComplete()) {
+                    section.revealNext();
                 }
-            });
+            }
         }, 900); // Wait for scroll animation to complete
     });
     
@@ -359,7 +355,17 @@ $(document).ready(function() {
         const containerOffset = container.offset().top;
         
         Object.keys(revealSections).forEach(key => {
-            revealSections[key].checkActive(scrollTop, containerOffset);
+            const section = revealSections[key];
+            const wasActive = section.isActive;
+            section.checkActive(scrollTop, containerOffset);
+            
+            // Auto-reveal all content on mobile when section becomes active
+            if (isMobileDevice && section.isActive && !wasActive && !section.hasBeenRevealed) {
+                // Reveal all items in the section
+                while (!section.isComplete()) {
+                    section.revealNext();
+                }
+            }
         });
     }
     
@@ -741,11 +747,15 @@ $(document).ready(function() {
     
     // ===== INITIALIZATION =====
     
+    // Detect mobile on load
+    detectMobile();
+    
     // Calculate section offsets on load
     calculateSectionOffsets();
     
-    // Recalculate on window resize
+    // Recalculate on window resize and re-detect mobile
     $(window).on('resize', function() {
+        detectMobile();
         calculateSectionOffsets();
     });
     
