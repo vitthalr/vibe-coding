@@ -82,17 +82,18 @@ $(document).ready(function() {
         previousSection = currentSectionObj;
     });
     
-    // Navigation dot click handler
+    // Navigation dot click handler - Auto-reveals all content (great for mobile/touch devices!)
     navDots.on('click', function() {
         const sectionIndex = $(this).data('section');
         const targetScroll = sectionOffsets[sectionIndex] || 0;
         scrollToPosition(targetScroll, 800);
         
-        // After scrolling, reveal all content for reveal sections
+        // After scrolling, automatically reveal ALL content for reveal sections
+        // This is especially useful for mobile devices where pressing → repeatedly is tedious
         setTimeout(function() {
             const section = getActiveSection();
             if (section && !section.hasBeenRevealed) {
-                // Reveal all items in the section
+                // Reveal all items in the section automatically
                 while (!section.isComplete()) {
                     section.revealNext();
                 }
