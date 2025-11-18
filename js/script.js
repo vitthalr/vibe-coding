@@ -91,13 +91,22 @@ $(document).ready(function() {
         // After scrolling, automatically reveal ALL content for reveal sections
         // This is especially useful for mobile devices where pressing → repeatedly is tedious
         setTimeout(function() {
-            const section = getActiveSection();
-            if (section && !section.hasBeenRevealed) {
-                // Reveal all items in the section automatically
-                while (!section.isComplete()) {
-                    section.revealNext();
+            // Manually check which section we scrolled to by checking all reveal sections
+            Object.keys(revealSections).forEach(key => {
+                const section = revealSections[key];
+                const scrollTop = container.scrollTop();
+                const containerOffset = container.offset().top;
+                
+                // Check if this section is now active
+                if (section.checkActive(scrollTop, containerOffset)) {
+                    // If this section hasn't been revealed yet, reveal all its content
+                    if (!section.hasBeenRevealed) {
+                        while (!section.isComplete()) {
+                            section.revealNext();
+                        }
+                    }
                 }
-            }
+            });
         }, 900); // Wait for scroll animation to complete
     });
     
