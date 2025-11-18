@@ -1,0 +1,1076 @@
+<!DOCTYPE html>
+<html lang="en" class="scroll-smooth">
+<head>
+    <meta charset="UTF-8">
+    <meta name="viewport" content="width=device-width, initial-scale=1.0">
+    <title>Vibe Coding: Smart Tools for Design | Vitthal Roonwal</title>
+    
+    <!-- Tailwind CSS -->
+    <script src="https://cdn.tailwindcss.com"></script>
+    
+    <!-- jQuery -->
+    <script src="https://code.jquery.com/jquery-3.7.1.min.js"></script>
+    
+    <!-- Prism.js for code highlighting -->
+    <link href="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/themes/prism-tomorrow.min.css" rel="stylesheet" />
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/prism.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-javascript.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-css.min.js"></script>
+    <script src="https://cdnjs.cloudflare.com/ajax/libs/prism/1.29.0/components/prism-html.min.js"></script>
+    
+    <style>
+        /* Scroll snap container */
+        .snap-container {
+            scroll-snap-type: y mandatory;
+            overflow-y: scroll;
+            height: 100vh;
+        }
+        .snap-section {
+            min-height: 100vh;
+        }
+        
+        .snap-section {
+            scroll-snap-align: start;
+            min-height: 100vh;
+        }
+        
+        /* Custom scrollbar styling for all scrollable elements */
+        ::-webkit-scrollbar {
+            width: 8px;
+            height: 8px;
+        }
+        
+        ::-webkit-scrollbar-track {
+            background: rgba(0, 0, 0, 0.1);
+        }
+        
+        ::-webkit-scrollbar-thumb {
+            background: rgba(255, 255, 255, 0.3);
+            border-radius: 4px;
+        }
+        
+        ::-webkit-scrollbar-thumb:hover {
+            background: rgba(255, 255, 255, 0.5);
+        }
+
+        /* Gradient animations */
+        @keyframes gradient-shift {
+            0%, 100% {
+                background-position: 0% 50%;
+            }
+            50% {
+                background-position: 100% 50%;
+            }
+        }
+        
+        .gradient-animate {
+            background-size: 200% 200%;
+            animation: gradient-shift 15s ease infinite;
+        }
+
+        /* Floating animation for elements */
+        @keyframes float {
+            0%, 100% {
+                transform: translateY(0px);
+            }
+            50% {
+                transform: translateY(-20px);
+            }
+        }
+        
+        .float-animation {
+            animation: float 6s ease-in-out infinite;
+        }
+
+        /* Progress indicator */
+        .progress-bar {
+            position: fixed;
+            top: 0;
+            left: 0;
+            height: 4px;
+            background: linear-gradient(90deg, #7775D6, #E935C1);
+            z-index: 9999;
+            transition: width 0.3s ease;
+        }
+
+        /* Navigation dots */
+        .nav-dots {
+            position: fixed;
+            right: 2rem;
+            top: 50%;
+            transform: translateY(-50%);
+            z-index: 1000;
+        }
+        
+        .nav-dot {
+            width: 12px;
+            height: 12px;
+            border-radius: 50%;
+            background: rgba(255, 255, 255, 0.3);
+            margin: 1rem 0;
+            cursor: pointer;
+            transition: all 0.3s ease;
+        }
+        
+        .nav-dot.active {
+            background: white;
+            transform: scale(1.5);
+        }
+
+        /* Code block styling */
+        pre[class*="language-"] {
+            border-radius: 1rem;
+            margin: 1rem 0;
+            background: #000000b8 !important;
+        }
+        
+        /* Copy button styling */
+        .prompt-container,
+        .code-block-wrapper {
+            position: relative;
+        }
+        
+        .copy-btn {
+            position: absolute;
+            top: 0.5rem;
+            right: 0.5rem;
+            background: rgba(255, 255, 255, 0.1);
+            border: 1px solid rgba(255, 255, 255, 0.2);
+            border-radius: 0.375rem;
+            padding: 0.375rem;
+            cursor: pointer;
+            opacity: 0;
+            transition: all 0.2s ease;
+            display: flex;
+            align-items: center;
+            justify-content: center;
+            color: white;
+            z-index: 10;
+        }
+        
+        .prompt-container:hover .copy-btn,
+        .code-block-wrapper:hover .copy-btn {
+            opacity: 1;
+        }
+        
+        .copy-btn:hover {
+            background: rgba(255, 255, 255, 0.2);
+        }
+        
+        .copy-btn.copied {
+            background: rgba(34, 197, 94, 0.3);
+            border-color: rgba(34, 197, 94, 0.6);
+        }
+        
+        .copy-btn svg {
+            width: 1rem;
+            height: 1rem;
+        }
+        
+        /* Responsive scaling - scale everything proportionally */
+        html {
+            font-size: 16px; /* Base size for desktop */
+        }
+        
+        @media (max-width: 1280px) {
+            html {
+                font-size: 13px; /* Scale down slightly */
+            }
+        }
+        
+        @media (max-width: 1024px) {
+            html {
+                font-size: 12px; /* Scale down more for tablets */
+            }
+        }
+        
+        @media (max-width: 768px) {
+            html {
+                font-size: 12px; /* Scale down for mobile */
+            }
+            
+            .nav-dots {
+                right: 0.5rem;
+            }
+            
+            .nav-dot {
+                width: 8px;
+                height: 8px;
+                margin: 0.5rem 0;
+            }
+            
+            .nav-dot.active {
+                transform: scale(1.3);
+            }
+        }
+        
+        @media (max-width: 640px) {
+            html {
+                font-size: 10px; /* Scale down more for small mobile */
+            }
+        }
+        
+        @media (max-width: 480px) {
+            html {
+                font-size: 9px; /* Extra small screens */
+            }
+        }
+        
+    </style>
+</head>
+<body class="bg-gray-900 text-white">
+    <!-- Progress Bar -->
+    <div class="progress-bar" id="progressBar"></div>
+    
+    <!-- Navigation Dots -->
+    <div class="nav-dots hidden md:block">
+        <div class="nav-dot active" data-section="0"></div>
+        <div class="nav-dot" data-section="1"></div>
+        <div class="nav-dot" data-section="2"></div>
+        <div class="nav-dot" data-section="3"></div>
+        <div class="nav-dot" data-section="4"></div>
+        <div class="nav-dot" data-section="5"></div>
+        <div class="nav-dot" data-section="6"></div>
+        <div class="nav-dot" data-section="7"></div>
+        <div class="nav-dot" data-section="8"></div>
+        <div class="nav-dot" data-section="9"></div>
+        <div class="nav-dot" data-section="10"></div>
+        <div class="nav-dot" data-section="11"></div>
+        <div class="nav-dot" data-section="12"></div>
+    </div>
+
+    <!-- Main Container with Scroll Snap -->
+    <div class="snap-container" id="mainContainer">
+        
+        <!-- Section 1: Title / Hero -->
+        <section class="snap-section flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900/30 to-gray-900">
+            <!-- Three.js Background Container -->
+            <div id="hero-three-container" class="absolute inset-0 z-0"></div>
+            
+            <!-- Gradient overlay for depth -->
+            <div class="absolute inset-0 bg-gradient-to-b from-gray-900/50 via-gray-900/30 to-gray-900/80 z-0"></div>
+            
+            <!-- Background Music Player -->
+            <div class="absolute top-6 left-6 z-50">
+                <button id="musicToggle" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-full p-4 transition-all ring-1 ring-white/20 hover:ring-white/40 shadow-lg">
+                    <svg id="playIcon" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <svg id="pauseIcon" class="w-6 h-6 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+                <audio id="heroMusic" loop preload="auto">
+                    <source src="https://assets.mixkit.co/music/299/299.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+            
+            <div class="mx-auto max-w-7xl px-6 text-center relative z-10">
+                <h1 class="text-6xl md:text-8xl font-bold tracking-tight text-white mb-6 gradient-animate bg-gradient-to-r from-purple-400 via-pink-500 to-purple-600 bg-clip-text text-transparent">
+                    Vibe Coding
+                </h1>
+                
+                <div class="flex items-center justify-center gap-3 mb-8">
+                    <div class="h-1 w-12 bg-gradient-to-r from-transparent via-purple-500 to-transparent"></div>
+                    <div class="h-1 w-1 bg-purple-500 rounded-full"></div>
+                    <div class="h-1 w-12 bg-gradient-to-r from-transparent via-pink-500 to-transparent"></div>
+                </div>
+                
+                <p class="text-2xl md:text-4xl font-semibold bg-gradient-to-r from-gray-200 via-white to-gray-200 bg-clip-text text-transparent mb-4">
+                    Smart Tools for Design
+                </p>
+                
+                <p class="text-lg md:text-xl text-purple-300/80 max-w-2xl mx-auto mb-8">
+                    Unlock the power of AI-assisted development and create stunning experiences
+                </p>
+                <!-- Details in cards -->
+                <div class="mt-12 max-w-4xl mx-auto">
+                    <div class="grid grid-cols-1 md:grid-cols-2 gap-6">
+                        <!-- Date & Time Card -->
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-400/30 transition-all">
+                            <div class="text-3xl mb-3">📅</div>
+                            <p class="text-sm text-gray-400 mb-1">When</p>
+                            <p class="text-white font-semibold">Tuesday, Nov 18, 2025</p>
+                            <p class="text-purple-300">1:30 PM - 5:30 PM</p>
+                        </div>
+                        
+                        <!-- Location Card -->
+                        <div class="bg-white/5 backdrop-blur-sm rounded-2xl p-6 ring-1 ring-white/10 hover:ring-pink-400/30 transition-all">
+                            <div class="text-3xl mb-3">📍</div>
+                            <p class="text-sm text-gray-400 mb-1">Where</p>
+                            <p class="text-white font-semibold">NIFT Bengaluru</p>
+                            <p class="text-pink-300">Design Campus</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Speaker Info -->
+                <div class="mt-12 inline-block bg-gradient-to-r from-purple-500/10 via-pink-500/10 to-purple-500/10 backdrop-blur-sm rounded-2xl p-8 ring-1 ring-purple-400/20">
+                    <div class="flex items-center justify-center gap-4 flex-col sm:flex-row">
+                        <img src="images/1627054696106.jpeg" 
+                             alt="Vitthal Roonwal" 
+                             class="w-16 h-16 rounded-full ring-2 ring-purple-400/50 object-cover">
+                        <div class="text-center sm:text-left">
+                            <p class="text-2xl font-bold text-white mb-1">Vitthal Roonwal</p>
+                            <p class="text-lg text-purple-300">Principal UX Engineer, Microsoft</p>
+                        </div>
+                    </div>
+                </div>
+                
+                <!-- Scroll Indicator -->
+                <div class="mt-16">
+                    <div class="inline-flex flex-col items-center">
+                        <p class="text-sm text-gray-400 mb-2">Scroll to explore</p>
+                        <div class="w-6 h-10 border-2 border-purple-400/50 rounded-full flex items-start justify-center p-2">
+                            <div class="w-1 h-2 bg-purple-400 rounded-full animate-bounce"></div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 2: About Me -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-indigo-900/20 via-gray-900 to-gray-900">
+            <div class="mx-auto max-w-7xl px-6 sm:px-6 lg:px-8">
+                <div class="relative isolate overflow-hidden bg-gray-900 px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:flex lg:gap-x-20 lg:px-24 lg:pt-0">
+                    <div class="mx-auto max-w-4xl text-center lg:mx-0 lg:flex-auto lg:py-32">
+                        <h2 class="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-8">About Me</h2>
+                        <div class="mt-8 space-y-4 text-lg text-gray-300 text-left">
+                            <p>👋 From Ajmer, Rajasthan → Studied in Jaipur → Now in Bangalore</p>
+                            <p>💼 <strong class="text-white">Bluestone.com</strong> - 7 years (Start-up journey)</p>
+                            <p>🚀 <strong class="text-white">Microsoft</strong> - 7 years as Principal UX Engineer</p>
+                            <p>✨ <strong class="text-white">14+ years</strong> of building digital experiences</p>
+                        </div>
+                        
+                        <div class="mt-12 p-6 bg-white/5 rounded-2xl ring-1 ring-purple-400/30">
+                            <h3 class="text-xl font-semibold text-white mb-4">Let's Connect</h3>
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-4 text-left text-gray-300">
+                                <div>
+                                    <p class="text-sm text-gray-400">Email</p>
+                                    <p class="text-white">vitthal.roonwal@gmail.com</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-400">Phone</p>
+                                    <p class="text-white">+91-805-079-8355</p>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-400">LinkedIn</p>
+                                    <a href="https://www.linkedin.com/in/vitthalroonwal/" target="_blank" class="text-purple-400 hover:text-purple-300">/in/vitthalroonwal</a>
+                                </div>
+                                <div>
+                                    <p class="text-sm text-gray-400">GitHub</p>
+                                    <a href="https://github.com/vitthalr" target="_blank" class="text-purple-400 hover:text-purple-300">/vitthalr</a>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 3: Session Agenda -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-purple-900/20 via-gray-900 to-pink-900/20" id="journeySection">
+            <div class="mx-auto max-w-7xl px-6 py-16" id="journeyContainer">
+                <div class="text-center mb-12" id="journeyHeader">
+                    <h2 class="text-5xl font-bold text-white mb-4">Today's Journey</h2>
+                    <p class="text-xl text-gray-400">4 hours of AI-powered creativity</p>
+                    <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal the journey</p>
+                </div>
+                
+                <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 overflow-hidden transition-all ease-out" id="timelineContainer" style="max-height: 0; opacity: 0; transition-duration: 1500ms;">
+                    <!-- Left Column -->
+                    <div>
+                        <ol class="relative border-l border-gray-700 opacity-0 transition-opacity duration-500" id="journeyTimelineLeft">
+                            <li class="mb-10 ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="0">
+                                <div class="absolute w-4 h-4 bg-purple-500 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">1:30 PM - 2:00 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>🌐</span>
+                                    <span>Web Fundamentals</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">HTML, CSS, JavaScript - Understanding the building blocks of the web</p>
+                            </li>
+                            
+                            <li class="mb-10 ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="1">
+                                <div class="absolute w-4 h-4 bg-cyan-500 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">2:00 PM - 2:30 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>⚡</span>
+                                    <span>Tailwind CSS</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">Build beautiful UIs in minutes, not hours. Copy, paste, and deploy!</p>
+                            </li>
+                            
+                            <li class="mb-10 ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="2">
+                                <div class="absolute w-4 h-4 bg-pink-500 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">2:30 PM - 3:00 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>🤖</span>
+                                    <span>GitHub Copilot</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">AI-powered coding - Your new superpower. Watch code write itself!</p>
+                            </li>
+                            
+                            <li class="ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="3">
+                                <div class="absolute w-4 h-4 bg-purple-400 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">3:00 PM - 3:30 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>🎨</span>
+                                    <span>Three.js Magic</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">Create stunning 3D graphics in your browser with AI assistance</p>
+                            </li>
+                        </ol>
+                    </div>
+                    
+                    <!-- Right Column -->
+                    <div>
+                        <ol class="relative border-l border-gray-700 opacity-0 transition-opacity duration-500" id="journeyTimelineRight">
+                            <li class="mb-10 ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="4">
+                                <div class="absolute w-4 h-4 bg-gray-500 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">3:30 PM - 3:40 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>☕</span>
+                                    <span>Break Time</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">Stretch, refresh, and get ready for Part 2!</p>
+                            </li>
+                            
+                            <li class="mb-10 ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="5">
+                                <div class="absolute w-4 h-4 bg-blue-500 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">3:40 PM - 4:40 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>📱</span>
+                                    <span>iOS App Development</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">Build a Tic-Tac-Toe game with Swift and GitHub Copilot</p>
+                            </li>
+                            
+                            <li class="mb-10 ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="6">
+                                <div class="absolute w-4 h-4 bg-orange-500 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">4:40 PM - 5:15 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>🎭</span>
+                                    <span>Blender + AI (MCP)</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">3D modeling with natural language using Model Context Protocol</p>
+                            </li>
+                            
+                            <li class="ml-6 timeline-item opacity-0 translate-x-8 transition-all duration-500" data-index="7">
+                                <div class="absolute w-4 h-4 bg-purple-600 rounded-full border-2 border-gray-900"></div>
+                                <time class="mb-1 text-base font-medium leading-none text-gray-400 block pl-6">5:15 PM - 5:30 PM</time>
+                                <h3 class="text-2xl font-semibold text-white my-2 flex items-center gap-3">
+                                    <span>💬</span>
+                                    <span>Q&A Session</span>
+                                </h3>
+                                <p class="text-base font-normal text-gray-300">Ask questions, discuss ideas, and explore possibilities together</p>
+                            </li>
+                        </ol>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 4: Web Fundamentals -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-orange-900/20 via-gray-900 to-purple-900/20" id="webFundamentalsSection">
+            <div class="mx-auto max-w-7xl px-6 py-16" id="webFundamentalsContainer">
+                <div class="relative isolate overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900/20 to-gray-900 px-8 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:px-24">
+                    <div class="text-center mb-12" id="webFundamentalsHeader">
+                        <h2 class="text-5xl font-bold text-white mb-4">You Use Websites Every Day...</h2>
+                        <p class="text-2xl text-gray-300">But do you know what they're made of?</p>
+                        <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal the blocks</p>
+                    </div>
+                    
+                    <div class="grid grid-cols-1 md:grid-cols-3 gap-8 pb-16 transition-all ease-out" id="webBlocksContainer" style="max-height: 0; opacity: 0; transition-duration: 1500ms;">
+                        <div class="text-center p-8 bg-black/40 rounded-2xl ring-1 ring-white/10 web-block opacity-0 translate-y-8 transition-all duration-500" data-index="0">
+                            <div class="text-6xl mb-4">🏗️</div>
+                            <h3 class="text-3xl font-bold text-orange-400 mb-4">HTML</h3>
+                            <p class="text-lg text-gray-300 mb-4">The Structure</p>
+                            <p class="text-sm text-gray-400">Like the skeleton of a building - it defines the structure and content</p>
+                            <div class="mt-6 text-left">
+                                <pre class="text-xs"><code class="language-html">&lt;div&gt;
+  &lt;h1&gt;Hello World&lt;/h1&gt;
+  &lt;p&gt;Welcome!&lt;/p&gt;
+&lt;/div&gt;</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center p-8 bg-black/40 rounded-2xl ring-1 ring-white/10 web-block opacity-0 translate-y-8 transition-all duration-500" data-index="1">
+                            <div class="text-6xl mb-4">🎨</div>
+                            <h3 class="text-3xl font-bold text-blue-400 mb-4">CSS</h3>
+                            <p class="text-lg text-gray-300 mb-4">The Style</p>
+                            <p class="text-sm text-gray-400">The paint, decoration, and design - makes it beautiful</p>
+                            <div class="mt-6 text-left">
+                                <pre class="text-xs"><code class="language-css">.button {
+  background: purple;
+  padding: 1rem;
+  border-radius: 8px;
+}</code></pre>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center p-8 bg-black/40 rounded-2xl ring-1 ring-white/10 web-block opacity-0 translate-y-8 transition-all duration-500" data-index="2">
+                            <div class="text-6xl mb-4">⚡</div>
+                            <h3 class="text-3xl font-bold text-yellow-400 mb-4">JavaScript</h3>
+                            <p class="text-lg text-gray-300 mb-4">The Behavior</p>
+                            <p class="text-sm text-gray-400">Makes it interactive - clicks, animations, dynamic content</p>
+                            <div class="mt-6 text-left">
+                                <pre class="text-xs"><code class="language-javascript">button.addEventListener(
+  'click', () => {
+  alert('Hello!');
+});</code></pre>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 5: The Problem & Tailwind Solution -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-cyan-900/20 via-gray-900 to-blue-900/20" id="tailwindSection">
+            <div class="mx-auto max-w-7xl px-6" id="tailwindContainer">
+                <div class="relative isolate overflow-hidden bg-gray-900 px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:px-24 lg:pt-0">
+                    <div class="mx-auto max-w-4xl text-center lg:py-32">
+                        <div id="tailwindHeader">
+                            <h2 class="text-4xl font-bold tracking-tight text-white sm:text-5xl mb-4">
+                                The Problem: Writing Code Takes Time
+                            </h2>
+                            <p class="text-xl text-gray-300">
+                                You need to write hundreds of lines of HTML and CSS to create beautiful interfaces...
+                            </p>
+                            <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal the solution</p>
+                        </div>
+                        
+                        <div id="tailwindContent" class="transition-all ease-out" style="max-height: 0; opacity: 0; transition-duration: 1500ms;">
+                            <div class="tailwind-item opacity-0 translate-y-8 transition-all duration-500" data-index="0">
+                                <div class="p-8 bg-gradient-to-r from-cyan-500/10 to-blue-500/10 rounded-2xl ring-1 ring-cyan-500/20">
+                                    <h3 class="text-3xl font-bold text-cyan-400 mb-6">Enter Tailwind CSS</h3>
+                                    <p class="text-xl text-gray-300 mb-8">
+                                        Copy. Paste. Done. ✨
+                                    </p>
+                                    <p class="text-lg text-gray-400 mb-8">
+                                        Pre-built components that look stunning. No custom CSS needed.
+                                    </p>
+                                    
+                                    <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                        <a href="https://tailwindcss.com/docs/installation/play-cdn" target="_blank" 
+                                           class="rounded-md bg-white px-6 py-3 text-sm font-semibold text-gray-900 shadow-xs hover:bg-gray-100 transition">
+                                            Get Started with Tailwind
+                                        </a>
+                                        <a href="https://tailwindcss.com/plus/ui-blocks/marketing" target="_blank" 
+                                           class="rounded-md bg-cyan-500 px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-cyan-400 transition">
+                                            Explore UI Blocks
+                                        </a>
+                                    </div>
+                                </div>
+                                
+                                <div class="mt-8 text-left bg-white/5 rounded-2xl p-6 ring-1 ring-cyan-400/30">
+                                    <p class="text-sm text-gray-400">Live Demo: We'll copy components from Tailwind and see them work instantly!</p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 6: GitHub Copilot Introduction -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-purple-900/20 via-gray-900 to-pink-900/20" id="copilotSection">
+            <div class="mx-auto max-w-7xl px-6" id="copilotContainer">
+                <div class="relative isolate overflow-hidden bg-gradient-to-br from-gray-900 via-purple-900/20 to-pink-900/20 px-8 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:py-16">
+                    <div class="text-center mb-12" id="copilotHeader">
+                        <h2 class="text-5xl font-bold text-white mb-4">What If We Could Automate This?</h2>
+                        <p class="text-2xl text-gray-300">From copy-paste to AI-generation</p>
+                        <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal</p>
+                    </div>
+                    
+                    <div class="transition-all ease-out" id="copilotContent" style="max-height: 0; opacity: 0; transition-duration: 1500ms;">
+                        <!-- Item 0: ChatGPT intro - full width -->
+                        <div class="mb-8 copilot-item opacity-0 translate-y-8 transition-all duration-500" data-index="0">
+                            <h3 class="text-3xl font-bold text-purple-400 mb-4">You know ChatGPT, right?</h3>
+                            <p class="text-lg text-gray-300">
+                                You give it a prompt → It gives you an answer
+                            </p>
+                        </div>
+                        
+                        <!-- Items 1 & 2: Copilot and Exercise side by side -->
+                        <div class="grid grid-cols-1 lg:grid-cols-2 gap-12 items-start">
+                            <!-- Item 1: Meet GitHub Copilot -->
+                            <div class="p-6 bg-white/5 rounded-2xl ring-1 ring-purple-500/30 copilot-item opacity-0 translate-y-8 transition-all duration-500" data-index="1">
+                                <h3 class="text-3xl font-bold text-pink-400 mb-4">Meet GitHub Copilot</h3>
+                                <p class="text-lg text-gray-300 mb-4">
+                                    ChatGPT + Code Generation = 🚀
+                                </p>
+                                <ul class="space-y-3 text-gray-300">
+                                    <li>✨ Writes code as you type</li>
+                                    <li>🧠 Understands context</li>
+                                    <li>⚡ Accelerates development 10x</li>
+                                    <li>🎯 Learns your coding style</li>
+                                </ul>
+                            </div>
+                            
+                            <!-- Item 2: Exercise -->
+                            <div class="bg-gray-900/50 rounded-2xl p-8 ring-1 ring-white/10 copilot-item opacity-0 translate-y-8 transition-all duration-500" data-index="2">
+                            <h4 class="text-xl font-semibold text-white mb-4">Exercise 1: Build Together</h4>
+                            <div class="prompt-container bg-black/50 rounded-lg p-4 mb-4">
+                                <button class="copy-btn" data-prompt="Create a stunning glassmorphic landing page with vanilla JavaScript and Tailwind CSS. Include a hero section with frosted glass effect, floating cards with backdrop blur, smooth scroll animations, and gradient text.">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                                <p class="text-sm text-gray-400 mb-2">Prompt:</p>
+                                <p class="text-green-400 font-mono text-sm">
+                                    "Create a stunning glassmorphic landing page with vanilla JavaScript and Tailwind CSS. Include a hero section with frosted glass effect, floating cards with backdrop blur, smooth scroll animations, and gradient text."
+                                </p>
+                            </div>
+                                    <p class="text-gray-300 text-sm">
+                                        We'll use GitHub Copilot to generate this in real-time, then you'll create your own!
+                                    </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 7: Three.js & Interactivity -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-purple-900/20 via-gray-900 to-pink-900/20" id="jsMagicSection">
+            <div class="mx-auto max-w-7xl px-6 py-16 w-full" id="jsMagicContainer">
+                <div class="text-center mb-12" id="jsMagicHeader">
+                    <h2 class="text-5xl font-bold text-white mb-4">JavaScript Can Do Magic ✨</h2>
+                    <p class="text-2xl text-gray-300">Beyond clicks - Let's create 3D experiences</p>
+                    <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal</p>
+                </div>
+                
+                <div class="grid grid-cols-1 lg:grid-cols-2 gap-8 items-center transition-all ease-out" id="jsMagicContent" style="max-height: 0; opacity: 0; transition-duration: 1500ms; min-height: 350px">
+                    <div class="js-magic-card opacity-0 translate-y-8 transition-all duration-500" data-index="0">
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-8 ring-1 ring-white/10 mb-8">
+                            <h3 class="text-3xl font-bold text-blue-400 mb-6">What JavaScript Powers:</h3>
+                            <ul class="space-y-4 text-lg text-gray-300">
+                                <li>🎮 Interactive games</li>
+                                <li>🎬 Animations and transitions</li>
+                                <li>🌐 Dynamic content loading</li>
+                                <li>🎨 Canvas and SVG manipulation</li>
+                                <li>🎭 3D graphics with Three.js</li>
+                                <li>🎵 Audio and video control</li>
+                            </ul>
+                        </div>
+                    </div>
+                    
+                    <div class="js-magic-card opacity-0 translate-y-8 transition-all duration-500" data-index="1">
+                        <div class="bg-gradient-to-br from-purple-900/30 to-pink-900/30 rounded-2xl p-8 ring-1 ring-purple-500/30">
+                            <h3 class="text-2xl font-bold text-white mb-4">Three.js Demo</h3>
+                            <p class="text-gray-300 mb-6">
+                                Check out this cosmic light tunnel created with Three.js:
+                            </p>
+                            <a href="https://cosmic-light.netlify.app/" target="_blank" 
+                               class="inline-block rounded-md bg-gradient-to-r from-purple-500 to-pink-500 px-6 py-3 text-sm font-semibold text-white shadow-xs hover:from-purple-600 hover:to-pink-600 transition mb-6">
+                                View Live Demo →
+                            </a>
+                            
+                            <div class="prompt-container bg-black/50 rounded-lg p-4 mt-6">
+                                <button class="copy-btn" data-prompt="Light Portal Animation - Use Three.js to create an animated 3D light tunnel or portal effect. Make it look like you're traveling through glowing rings or particles. Add camera movement forward and backward, looping smoothly. Use color gradients that shift slowly over time. Keep it minimal but cinematic.">
+                                    <svg fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M8 16H6a2 2 0 01-2-2V6a2 2 0 012-2h8a2 2 0 012 2v2m-6 12h8a2 2 0 002-2v-8a2 2 0 00-2-2h-8a2 2 0 00-2 2v8a2 2 0 002 2z"></path>
+                                    </svg>
+                                </button>
+                                <p class="text-sm text-gray-400 mb-2">Exercise 2 Prompt:</p>
+                                <p class="text-green-400 font-mono text-xs leading-relaxed">
+                                    "Light Portal Animation - Use Three.js to create an animated 3D light tunnel or portal effect. Make it look like you're traveling through glowing rings or particles. Add camera movement forward and backward, looping smoothly. Use color gradients that shift slowly over time. Keep it minimal but cinematic."
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8: Deployment -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-teal-900/20 via-gray-900 to-indigo-900/20" id="showTimeSection">
+            <div class="mx-auto max-w-7xl px-6" id="showTimeContainer">
+                <div class="relative isolate overflow-hidden bg-gray-900 px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:px-24 lg:pt-0">
+                    <div class="mx-auto max-w-4xl text-center lg:py-32">
+                        <div id="showTimeHeader">
+                            <h2 class="text-5xl font-bold text-white mb-4">It's Show Time! 🎉</h2>
+                            <p class="text-2xl text-gray-300">
+                                Let the world see what you built
+                            </p>
+                            <p class="text-xl text-gray-400">
+                                But how do you share it?
+                            </p>
+                            <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal</p>
+                        </div>
+                        
+                        <div id="showTimeContent" class="transition-all ease-out" style="max-height: 0; opacity: 0; transition-duration: 1500ms;">
+                            <div class="show-time-card opacity-0 translate-y-8 transition-all duration-500" data-index="0">
+                                <div class="bg-gradient-to-r from-teal-500/10 to-indigo-500/10 rounded-2xl p-8 ring-1 ring-teal-500/20">
+                            <h3 class="text-3xl font-bold text-teal-400 mb-6">Deploy with Netlify</h3>
+                            <p class="text-lg text-gray-300 mb-6">
+                                We’ll use GitHub Copilot to generate the deployment steps and commands, then we’ll authenticate and complete the Netlify deploy together.
+                            </p>
+                            
+                            <div class="bg-black/30 rounded-lg p-6 mb-6 text-left">
+                                <p class="text-sm text-gray-400 mb-3">Steps:</p>
+                                <ol class="space-y-2 text-gray-300">
+                                    <li>1. Ask Copilot: "<b>Deploy this to Netlify</b>"</li>
+                                    <li>2. Copilot opens browser → Login to Netlify</li>
+                                    <li>3. Follow the prompts</li>
+                                    <li>4. Get your unique URL! 🎊</li>
+                                </ol>
+                            </div>
+                            
+                            <p class="text-sm text-gray-400">
+                                Other options: Azure, your own server, GitHub Pages, Vercel... but Netlify is the quickest!
+                            </p>
+                                </div>
+                            </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 8.5: Break Time with Timer -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-purple-900/30 via-gray-900 to-pink-900/30">
+            <div class="mx-auto max-w-4xl px-6 text-center">
+                <h2 class="text-6xl font-bold text-white mb-8">⏰ Break Time!</h2>
+                <p class="text-2xl text-gray-300 mb-12">
+                    Stretch, grab some water, and get ready for Part 2 🚀
+                </p>
+                
+                <div class="bg-white/5 backdrop-blur-lg rounded-3xl p-12 ring-1 ring-white/20 mb-8">
+                    <div class="text-9xl font-bold text-white mb-4" id="timerDisplay">10:00</div>
+                    <p class="text-xl text-gray-300 mb-8">minutes remaining</p>
+                    
+                    <div class="flex items-center justify-center gap-4">
+                        <button id="startTimer" class="rounded-md bg-green-600 px-6 py-3 text-white shadow-xs hover:bg-green-500 transition flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                            </svg>
+                        </button>
+                        <button id="resetTimer" class="rounded-md bg-orange-600 px-6 py-3 text-white shadow-xs hover:bg-orange-500 transition flex items-center gap-2">
+                            <svg class="w-6 h-6" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                                <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M4 4v5h.582m15.356 2A8.001 8.001 0 004.582 9m0 0H9m11 11v-5h-.581m0 0a8.003 8.003 0 01-15.357-2m15.357 2H15"></path>
+                            </svg>
+                        </button>
+                    </div>
+                </div>
+                
+                <div class="bg-purple-500/10 rounded-lg p-6 ring-1 ring-purple-500/30">
+                    <p class="text-lg text-white font-semibold mb-2">Coming Up Next:</p>
+                    <p class="text-gray-300">📱 iOS App Development with Swift & GitHub Copilot</p>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 9: iOS Development -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-blue-900/20 via-gray-900 to-purple-900/20" id="beyondWebSection" style="font-size: 12px">
+            <div class="mx-auto max-w-7xl px-6 py-16 w-full" id="beyondWebContainer">
+                <div class="text-center mb-12" id="beyondWebHeader">
+                    <h2 class="text-5xl font-bold text-white mb-4">Beyond Websites 📱</h2>
+                    <p class="text-2xl text-gray-300">Can we build mobile apps with vibe coding?</p>
+                    <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal</p>
+                </div>
+                
+                <div class="max-w-5xl mx-auto  transition-all ease-out" id="beyondWebContent" style="max-height: 0; opacity: 0; transition-duration: 1500ms; min-height: 800px;">
+                    <div class="bg-gradient-to-br from-blue-900/30 to-purple-900/30 rounded-2xl p-8 ring-1 ring-blue-500/30 mb-8 beyond-web-card opacity-0 translate-y-8 transition-all duration-500 hover:ring-blue-400/50 transition-all mt-1" data-index="0">
+                        <h3 class="text-3xl font-bold text-blue-400 mb-6">Mobile Development Landscape</h3>
+                        <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-lg">
+                            <div class="bg-white/5 rounded-lg p-6 ring-1 ring-blue-400/20">
+                                <h4 class="text-xl font-semibold text-white mb-3">🍎 iOS</h4>
+                                <p class="text-gray-300">Uses Swift language</p>
+                                <p class="text-sm text-gray-400 mt-2">We'll focus on this today!</p>
+                            </div>
+                            <div class="bg-white/5 rounded-lg p-6 ring-1 ring-green-400/20">
+                                <h4 class="text-xl font-semibold text-white mb-3">🤖 Android</h4>
+                                <p class="text-gray-300">Uses Kotlin language</p>
+                                <p class="text-sm text-gray-400 mt-2">For another session...</p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-8 ring-1 ring-blue-400/30 beyond-web-card opacity-0 translate-y-8 transition-all duration-500 hover:ring-blue-400/50 transition-all mb-1" data-index="1">
+                        <h3 class="text-2xl font-bold text-white mb-6">Let's Build: Tic-Tac-Toe Game 🎮</h3>
+                        <p class="text-lg text-gray-300 mb-6">
+    We’ll follow a step-by-step tutorial to build an iOS app using vibe coding. 
+    <span class="block text-red-400 text-sm mt-2">
+       ⚠️ Requires macOS — I'll run the build on my Mac while everyone follows the code.
+    </span>
+                        </p>
+                        
+                        <a href="https://github.com/vitthalr/vibe-code-ios-app" target="_blank" 
+                           class="inline-flex items-center gap-2 rounded-md bg-blue-500 px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-400 transition mb-8">
+                            <span>📖 Open iOS Tutorial</span>
+                            <span aria-hidden="true">→</span>
+                        </a>
+                        
+                        <div class="bg-black/30 rounded-lg p-6">
+                            <p class="text-sm text-gray-400 mb-2">What we'll learn:</p>
+                            <ul class="space-y-2 text-gray-300">
+                                <li>✓ Setting up Xcode project</li>
+                                <li>✓ Using Swift with GitHub Copilot</li>
+                                <li>✓ Building UI with SwiftUI</li>
+                                <li>✓ Game logic and interactivity</li>
+                                <li>✓ Running on iOS simulator</li>
+                            </ul>
+                        </div>
+                        
+                        <p class="text-sm text-gray-400 mt-6">
+                            ⏱️ This session will take approximately 1 hour
+                        </p>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 10: Blender MCP -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-indigo-900/20 via-gray-900 to-purple-900/20" id="blenderMcpSection" style="min-height: 100vh">
+            <div class="mx-auto max-w-7xl px-6 py-16" id="blenderMcpContainer">
+                <div class="relative isolate overflow-hidden bg-gradient-to-br from-gray-900 via-indigo-900/20 to-gray-900 px-8 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:px-24 pb-16"  style="min-height: 350px">
+                    <div class="text-center mb-12" id="blenderMcpHeader">
+                        <h2 class="text-5xl font-bold text-white mb-4">Can We Build 3D Models Too? 🎭</h2>
+
+                        <p class="text-2xl text-gray-300">Spoiler: Yes, we absolutely can!</p>
+                        <p class="text-xl text-gray-300">
+                            Sure, we can use Three.js in JavaScript to create 3D graphics...<br/>
+                            But what about actual 3D modeling in Blender? 🤯
+                        </p>
+                        <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal</p>
+                    </div>
+                    
+                    <div class="max-w-6xl mx-auto grid grid-cols-1 lg:grid-cols-2 gap-8 transition-all ease-out" id="blenderMcpContent" style="max-height: 0; opacity: 0; transition-duration: 1500ms; min-height: 350px">
+                        <!-- Left: Introducing MCP -->
+                        <div class="blender-mcp-card opacity-0 translate-y-8 transition-all duration-500" data-index="0">
+                            <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-8 ring-1 ring-white/10 h-full">
+                                <h3 class="text-3xl font-bold text-indigo-400 mb-6">Introducing MCP</h3>
+                                <p class="text-xl text-gray-300 mb-4">
+                                    Model Context Protocol
+                                </p>
+                                <p class="text-lg text-gray-400 mb-6">
+                                    Allows AI to connect with non-AI applications
+                                </p>
+                                
+                                <div class="bg-black/30 rounded-lg p-6">
+                                    <p class="text-lg text-white mb-3">What this means:</p>
+                                    <p class="text-gray-300">
+                                        You can pass an image and say <span class="text-cyan-400">"Build this in Blender"</span> 
+                                        and AI will create the 3D model for you! 🎨
+                                    </p>
+                                </div>
+                            </div>
+                        </div>
+                        
+                        <!-- Right: Blender + MCP Demo -->
+                        <div class="blender-mcp-card opacity-0 translate-y-8 transition-all duration-500" data-index="1">
+                            <div class="bg-gradient-to-r from-indigo-500/10 to-purple-500/10 rounded-2xl p-8 ring-1 ring-indigo-500/30 h-full flex flex-col">
+                                <h4 class="text-2xl font-bold text-white mb-6">Blender + MCP Demo</h4>
+                                <p class="text-lg text-gray-300 mb-6">
+                                    Follow along as we integrate AI with Blender
+                                </p>
+                                
+                                <a href="https://github.com/vitthalr/blender-mcp-github-copilot" target="_blank" 
+                                   class="inline-flex items-center gap-2 rounded-md bg-indigo-600 px-6 py-3 text-sm font-semibold text-white shadow-xs hover:bg-indigo-500 transition mb-6 self-start">
+                                    <span>📖 Open Blender MCP Tutorial</span>
+                                    <span aria-hidden="true">→</span>
+                                </a>
+                                
+                                <p class="text-sm text-gray-400 mt-auto">
+                                    We'll walk through the setup and see a live demonstration of AI-powered 3D modeling
+                                </p>
+                            </div>
+                        </div>
+                    </div>
+                    
+                    <!-- Figma MCP Section -->
+                    <div class="max-w-6xl mx-auto mt-8 p-6 bg-purple-500/10 rounded-lg ring-1 ring-purple-500/30 blender-mcp-card opacity-0 translate-y-8 transition-all duration-500" data-index="2">
+                        <h4 class="text-xl font-semibold text-white mb-3">💡 Try It Yourself: Figma MCP</h4>
+                        <p class="text-gray-300 mb-4">
+                            Want to connect AI with Figma? Here's a tutorial created with clear instructions:
+                        </p>
+                        <a href="https://github.com/vitthalr/github-copilot-talk-to-figma-mcp" target="_blank" 
+                           class="text-purple-400 hover:text-purple-300 underline">
+                            github.com/vitthalr/github-copilot-talk-to-figma-mcp
+                        </a>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 11: What's Next & Possibilities -->
+        <section class="snap-section flex items-center justify-center bg-gradient-to-br from-purple-900/20 via-gray-900 to-pink-900/20" id="whatsNextSection"  style="min-height: 100vh">
+            <div class="mx-auto max-w-7xl px-6 py-16" id="whatsNextContainer" >
+                <div class="text-center mb-12" id="whatsNextHeader">
+                    <h2 class="text-5xl font-bold text-white mb-4">What's Next? 🚀</h2>
+                    <p class="text-2xl text-gray-300">This is just the beginning...</p>
+                    <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal the possibilities</p>
+                </div>
+                
+                <div class="max-w-6xl mx-auto overflow-hidden transition-all ease-out" id="whatsNextContent" style="max-height: 0; opacity: 0; transition-duration: 1500ms; min-height: 600px">
+                    <div class="m-1">
+                    <div class="grid grid-cols-1 md:grid-cols-2 lg:grid-cols-3 gap-6 mb-12">
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="0">
+                            <h3 class="text-xl font-semibold text-white mb-3">🎮&nbsp; Complex Games</h3>
+                            <p class="text-gray-400 text-sm">Build full-featured games with physics, multiplayer, and more</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="1">
+                            <h3 class="text-xl font-semibold text-white mb-3">💬&nbsp; ChatGPT Clone</h3>
+                            <p class="text-gray-400 text-sm">Create your own AI chatbot with custom personality</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="2">
+                            <h3 class="text-xl font-semibold text-white mb-3">☁️&nbsp; LLM APIs on Azure</h3>
+                            <p class="text-gray-400 text-sm">Deploy your own language models in the cloud</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="3">
+                            <h3 class="text-xl font-semibold text-white mb-3">⚡&nbsp; GitHub Spark</h3>
+                            <p class="text-gray-400 text-sm">Build apps without even using VS Code!</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="4">
+                            <h3 class="text-xl font-semibold text-white mb-3">💖&nbsp; Lovable</h3>
+                            <p class="text-gray-400 text-sm">No-code platform for creating full-stack apps</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="5">
+                            <h3 class="text-xl font-semibold text-white mb-3">🎤&nbsp; AI Speech Services</h3>
+                            <p class="text-gray-400 text-sm">Voice-enabled ChatGPT with text-to-speech</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="6">
+                            <h3 class="text-xl font-semibold text-white mb-3">🎵&nbsp; Jam Along App</h3>
+                            <p class="text-gray-400 text-sm">Use Web Audio API to create drum beats and music</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="7">
+                            <h3 class="text-xl font-semibold text-white mb-3">🤖&nbsp; Custom AI Agents</h3>
+                            <p class="text-gray-400 text-sm">Build specialized AI assistants for any task</p>
+                        </div>
+                        
+                        <div class="bg-white/5 backdrop-blur-lg rounded-2xl p-6 ring-1 ring-white/10 hover:ring-purple-500/50 transition-all possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="8">
+                            <h3 class="text-xl font-semibold text-white mb-3">∞&nbsp; And Much More...</h3>
+                            <p class="text-gray-400 text-sm">The only limit is your imagination!</p>
+                        </div>
+                    </div>
+                   
+                    
+                    <div class="bg-gradient-to-r from-purple-900/30 to-pink-900/30 rounded-2xl p-8 ring-1 ring-purple-500/30 text-center possibility-card opacity-0 translate-y-8 transition-all duration-500" data-index="9">
+                        <h3 class="text-3xl font-bold text-white mb-4">The Power is Now in Your Hands</h3>
+                        <p class="text-xl text-gray-300 mb-6">
+                            You've unlocked AI-powered creativity across web, mobile, and 3D
+                        </p>
+                        <p class="text-lg text-gray-400 mb-2">
+                            Keep exploring, keep building, keep creating! 🎨✨
+                        </p>
+
+                        <!-- Added AI Responsibility Note -->
+                        <p class="text-sm text-gray-500 mt-4">
+                            ⚠️ AI accelerates creativity, but it still needs your judgment.  
+                            Always review and refine what it generates, the magic happens when humans and AI build together.
+                        </p>
+                    </div>
+
+                     </div>
+                </div>
+            </div>
+        </section>
+
+        <!-- Section 12: Thank You & Connect -->
+        <section class="snap-section flex items-center justify-center relative overflow-hidden bg-gradient-to-br from-indigo-900/20 via-gray-900 to-purple-900/20" id="thankYouSection">
+            <!-- Three.js Background Container -->
+            <div id="thankYouThreeContainer" class="absolute inset-0 z-0" style="opacity: 0; transition: opacity 1s;"></div>
+            
+            <!-- Thank You Music Player -->
+            <div class="absolute top-6 left-6 z-50" id="thankYouMusicContainer" style="opacity: 0; pointer-events: none; transition: opacity 0.5s;">
+                <button id="thankYouMusicToggle" class="group bg-white/10 backdrop-blur-md hover:bg-white/20 rounded-full p-4 transition-all ring-1 ring-white/20 hover:ring-white/40 shadow-lg">
+                    <svg id="thankYouPlayIcon" class="w-6 h-6 text-white" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M14.752 11.168l-3.197-2.132A1 1 0 0010 9.87v4.263a1 1 0 001.555.832l3.197-2.132a1 1 0 000-1.664z"></path>
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M21 12a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                    <svg id="thankYouPauseIcon" class="w-6 h-6 text-white hidden" fill="none" stroke="currentColor" viewBox="0 0 24 24">
+                        <path stroke-linecap="round" stroke-linejoin="round" stroke-width="2" d="M10 9v6m4-6v6m7-3a9 9 0 11-18 0 9 9 0 0118 0z"></path>
+                    </svg>
+                </button>
+                <audio id="thankYouMusic" loop preload="auto">
+                    <source src="https://assets.mixkit.co/music/299/299.mp3" type="audio/mpeg">
+                </audio>
+            </div>
+            
+            <div class="mx-auto max-w-7xl px-6" id="thankYouContainer">
+                <div class="relative isolate overflow-hidden bg-gray-900/40 backdrop-blur-sm px-6 pt-16 shadow-2xl sm:rounded-3xl sm:px-16 md:pt-24 lg:px-24 lg:pt-0">
+                    <div class="mx-auto max-w-4xl text-center lg:py-32 relative z-10">
+                        <div id="thankYouHeader">
+                            <h2 class="text-6xl font-bold tracking-tight text-white mb-8">Thank You! 🙏</h2>
+                            <p class="text-2xl text-gray-300 mb-6">
+                                Hope you had some great learning and lots of fun!
+                            </p>
+                            <p class="text-xl text-gray-400">
+                                Thank you for being patient and engaged throughout this journey
+                            </p>
+                            <p class="text-sm text-gray-500 mt-6 mb-12 animate-pulse">Press → to reveal</p>
+                        </div>
+                        
+                        <div id="thankYouContent" class="overflow-hidden transition-all ease-out" style="max-height: 0; opacity: 0; transition-duration: 1500ms;">
+                        <div class="bg-gradient-to-br from-gray-800/40 via-purple-900/20 to-gray-800/40 backdrop-blur-lg rounded-2xl p-8 ring-1 ring-gray-700/40 mb-12 thank-you-card opacity-0 translate-y-8 transition-all duration-500  m-1" data-index="0">
+                            <h3 class="text-3xl font-bold text-white mb-8">Let's Stay Connected</h3>
+                            
+                            <div class="grid grid-cols-1 md:grid-cols-2 gap-6 text-left mb-8">
+                                <div class="bg-white/5 rounded-lg p-6">
+                                    <p class="text-sm text-gray-400 mb-2">📧 Email</p>
+                                    <p class="text-white font-semibold">vitthal.roonwal@gmail.com</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-6">
+                                    <p class="text-sm text-gray-400 mb-2">📱 Phone</p>
+                                    <p class="text-white font-semibold">+91-805-079-8355</p>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-6">
+                                    <p class="text-sm text-gray-400 mb-2">💼 LinkedIn</p>
+                                    <a href="https://www.linkedin.com/in/vitthalroonwal/" target="_blank" 
+                                       class="text-blue-400 hover:text-blue-300 font-semibold break-all">
+                                        /in/vitthalroonwal
+                                    </a>
+                                </div>
+                                <div class="bg-white/5 rounded-lg p-6">
+                                    <p class="text-sm text-gray-400 mb-2">💻 GitHub</p>
+                                    <a href="https://github.com/vitthalr" target="_blank" 
+                                       class="text-purple-400 hover:text-purple-300 font-semibold">
+                                        /vitthalr
+                                    </a>
+                                </div>
+                            </div>
+                            
+                            <div class="flex flex-col sm:flex-row items-center justify-center gap-4">
+                                <a href="https://www.linkedin.com/in/vitthalroonwal/" target="_blank" 
+                                   class="rounded-md bg-blue-600 px-8 py-3 text-sm font-semibold text-white shadow-xs hover:bg-blue-500 transition">
+                                    Connect on LinkedIn
+                                </a>
+                                <a href="https://github.com/vitthalr" target="_blank" 
+                                   class="rounded-md bg-gray-700 px-8 py-3 text-sm font-semibold text-white shadow-xs hover:bg-gray-600 transition">
+                                    Follow on GitHub
+                                </a>
+                            </div>
+                        </div>
+                        
+                        <div class="text-center thank-you-card opacity-0 translate-y-8 transition-all duration-500" data-index="1">
+                            <p class="text-4xl font-bold text-white mb-6">Keep vibing, keep coding! ✨</p>
+                            <p class="text-sm text-gray-500">
+                                NIFT Bengaluru | Tuesday, November 18, 2025
+                            </p>
+                        </div>
+                        </div>
+                    </div>
+                </div>
+            </div>
+        </section>
+
+    </div>
+
+    <!-- External JavaScript -->
+    <script src="script.js"></script>
+    <script type="module" src="hero-threejs.js"></script>
+    <script type="module" src="thankyou-threejs.js"></script>
+</body>
+</html>
